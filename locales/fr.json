@@ -1,0 +1,20 @@
+{
+    "createPythonStructure": "Créer la structure du projet Python",
+    "analyzePythonProject": "Analyser le projet Python",
+    "updateRequirements": "Mettre à jour requirements.txt",
+    "enterProjectPath": "Entrez le chemin du projet",
+    "enterProjectPathToAnalyze": "Entrez le chemin du projet à analyser",
+    "enterProjectPathToUpdate": "Entrez le chemin du projet pour mettre à jour requirements.txt",
+    "projectStructureCreated": "Structure du projet Python créée!",
+    "projectIsUpToDate": "Le projet est déjà à jour!",
+    "missingElements": "Les éléments suivants sont manquants:",
+    "addMissingElements": "Voulez-vous les ajouter?",
+    "missingElementsAdded": "Éléments manquants ajoutés au projet!",
+    "noChangesMade": "Aucun changement apporté au projet.",
+    "requirementsUpdated": "requirements.txt mis à jour avec succès!",
+    "noPackagesToAdd": "Aucun nouveau paquet à ajouter à requirements.txt.",
+    "extensionDeactivated": "Extension désactivée",
+    "failedToCreateStructure": "Échec de la création de la structure du projet: ",
+    "failedToAnalyzeProject": "Échec de l'analyse du projet: ",
+    "failedToUpdateRequirements": "Échec de la mise à jour de requirements.txt: "
+}

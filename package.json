@@ -1,0 +1,69 @@
+{
+  "name": "pyracantha",
+  "displayName": "PyRacantha",
+  "description": "Setup python project basic structure and standardize them",
+  "version": "0.0.3",
+  "publisher": "your-username",
+  "engines": {
+      "vscode": "^1.50.0"
+  },
+  "categories": [
+      "Other"
+  ],
+  "activationEvents": [
+      "onCommand:extension.createPythonStructure",
+      "onCommand:extension.analyzePythonProject",
+      "onCommand:extension.updateRequirements"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+      "commands": [
+          {
+              "command": "extension.createPythonStructure",
+              "title": "Create Python Project Structure"
+          },
+          {
+              "command": "extension.analyzePythonProject",
+              "title": "Analyze Python Project"
+          },
+          {
+              "command": "extension.updateRequirements",
+              "title": "Update Requirements.txt"
+          }
+      ],
+      "configuration": {
+          "type": "object",
+          "title": "Python Project Structure Generator",
+          "properties": {
+              "pythonProjectStructure.directories": {
+                  "type": "array",
+                  "default": ["src", "tests", "docs", "configs"],
+                  "description": "Directories to be created in the Python project."
+              },
+              "pythonProjectStructure.files": {
+                  "type": "object",
+                  "default": {
+                      ".gitignore": "venv\n__pycache__\n*.pyc\n.DS_Store\n",
+                      "requirements.txt": "",
+                      "README.md": "# Project Title\n\nA brief description of your project.\n",
+                      "src/__init__.py": "",
+                      "tests/__init__.py": ""
+                  },
+                  "description": "Files to be created in the Python project, with their default content."
+              }
+          }
+      }
+  },
+  "scripts": {
+      "vscode:prepublish": "npm run compile",
+      "compile": "tsc -p ./",
+      "watch": "tsc -watch -p ./",
+      "postinstall": "node ./node_modules/vscode/bin/install"
+  },
+  "devDependencies": {
+      "@types/node": "^14.14.0",
+      "@types/vscode": "^1.50.0",
+      "typescript": "^4.0.3",
+      "vscode-test": "^1.4.0"
+  }
+}
