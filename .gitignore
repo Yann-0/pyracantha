@@ -3,3 +3,17 @@ dist
 node_modules
 .vscode-test/
 *.vsix
+.eslintrc.json
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Log files
+*.log
+
+# Temporary files
+*.tmp
+
+# Coverage directories
+coverage

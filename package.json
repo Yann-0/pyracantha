@@ -1,69 +1,68 @@
 {
   "name": "pyracantha",
-  "displayName": "PyRacantha",
-  "description": "Setup python project basic structure and standardize them",
-  "version": "0.0.3",
-  "publisher": "your-username",
+  "version": "0.0.1",
+  "publisher": "Yann Ortodoro",
   "engines": {
-      "vscode": "^1.50.0"
+    "vscode": "^1.50.0"
   },
-  "categories": [
-      "Other"
-  ],
   "activationEvents": [
-      "onCommand:extension.createPythonStructure",
-      "onCommand:extension.analyzePythonProject",
-      "onCommand:extension.updateRequirements"
+    "onCommand:extension.createPythonStructure",
+    "onCommand:extension.analyzePythonProject",
+    "onCommand:extension.updateRequirements"
   ],
   "main": "./out/extension.js",
   "contributes": {
-      "commands": [
-          {
-              "command": "extension.createPythonStructure",
-              "title": "Create Python Project Structure"
-          },
-          {
-              "command": "extension.analyzePythonProject",
-              "title": "Analyze Python Project"
-          },
-          {
-              "command": "extension.updateRequirements",
-              "title": "Update Requirements.txt"
-          }
-      ],
-      "configuration": {
-          "type": "object",
-          "title": "Python Project Structure Generator",
-          "properties": {
-              "pythonProjectStructure.directories": {
-                  "type": "array",
-                  "default": ["src", "tests", "docs", "configs"],
-                  "description": "Directories to be created in the Python project."
-              },
-              "pythonProjectStructure.files": {
-                  "type": "object",
-                  "default": {
-                      ".gitignore": "venv\n__pycache__\n*.pyc\n.DS_Store\n",
-                      "requirements.txt": "",
-                      "README.md": "# Project Title\n\nA brief description of your project.\n",
-                      "src/__init__.py": "",
-                      "tests/__init__.py": ""
-                  },
-                  "description": "Files to be created in the Python project, with their default content."
-              }
-          }
+    "commands": [
+      {
+        "command": "extension.createPythonStructure",
+        "title": "Create Python Structure"
+      },
+      {
+        "command": "extension.analyzePythonProject",
+        "title": "Analyze Python Project"
+      },
+      {
+        "command": "extension.updateRequirements",
+        "title": "Update Requirements"
       }
+    ],
+    "localizations": [
+      {
+        "languageId": "en",
+        "translations": [
+          {
+            "id": "extension.createPythonStructure",
+            "path": "./locales/en.json"
+          }
+        ]
+      },
+      {
+        "languageId": "fr",
+        "translations": [
+          {
+            "id": "extension.createPythonStructure",
+            "path": "./locales/fr.json"
+          }
+        ]
+      }
+    ]
   },
+  "files": [
+    "out",
+    "locales"
+  ],
   "scripts": {
-      "vscode:prepublish": "npm run compile",
-      "compile": "tsc -p ./",
-      "watch": "tsc -watch -p ./",
-      "postinstall": "node ./node_modules/vscode/bin/install"
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
   },
   "devDependencies": {
-      "@types/node": "^14.14.0",
-      "@types/vscode": "^1.50.0",
-      "typescript": "^4.0.3",
-      "vscode-test": "^1.4.0"
+    "@types/node": "^14.14.31",
+    "@types/vscode": "^1.50.0",
+    "@typescript-eslint/eslint-plugin": "^7.16.0",
+    "@typescript-eslint/parser": "^7.16.0",
+    "eslint": "^8.57.0",
+    "typescript": "^4.1.3",
+    "vscode-test": "^1.4.0"
   }
 }

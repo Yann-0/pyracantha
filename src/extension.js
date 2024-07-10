@@ -1,40 +1,27 @@
-import * as vscode from 'vscode';
-import * as fs from 'fs';
-import * as path from 'path';
-import { loadLocalization, msgTranslation } from './localization';
-
-// Interface for the project configuration
-interface ProjectConfig {
-    directories: string[];
-    files: { [key: string]: string };
-    standardLibModules: string[];
-}
-
-// Type definition for project path prompt function
-type ProjectPathPrompt = (prompt: string) => Promise<string | undefined>;
+const vscode = require('vscode');
+const fs = require('fs');
+const path = require('path');
+const { loadLocalization, msgTranslation } = require('./localization');
 
 // Logger for extension output
 const logger = vscode.window.createOutputChannel('PyRacantha');
 
-// Global variable for project configuration
-let globalProjectConfig: ProjectConfig | null = null;
-
 // Function to log informational messages
-function logInfo(message: string) {
+function logInfo(message) {
     logger.appendLine(`INFO: ${message}`);
     console.log(message);
 }
 
 // Function to log error messages
-function logError(message: string) {
+function logError(message) {
     logger.appendLine(`ERROR: ${message}`);
     console.error(message);
 }
 
 // Function to get the configuration file path from settings
-function getConfigFilePath(projectPath: string): string {
-    let configPath = vscode.workspace.getConfiguration().get<string>('pyracantha.configFile');
-
+function getConfigFilePath() {
+    let configPath = vscode.workspace.getConfiguration().get('pyracantha.configFile');
+    
     // Resolve ${workspaceFolder} placeholder
     if (configPath && configPath.includes('${workspaceFolder}')) {
         const workspaceFolder = vscode.workspace.workspaceFolders
@@ -43,18 +30,14 @@ function getConfigFilePath(projectPath: string): string {
         configPath = configPath.replace('${workspaceFolder}', workspaceFolder);
     }
 
-    if (!configPath) {
-        configPath = path.join(projectPath, '.vscode', 'pyracantha-config.json');
-    }
-
-    return path.resolve(configPath);
+    return configPath ? path.resolve(configPath) : '';
 }
 
 // Function to load project configuration from the JSON file
-function loadProjectConfig(projectPath: string): ProjectConfig {
-    const configFilePath = getConfigFilePath(projectPath);
+function loadProjectConfig() {
+    const configFilePath = getConfigFilePath();
     if (!fs.existsSync(configFilePath)) {
-        const defaultConfig: ProjectConfig = {
+        const defaultConfig = {
             directories: ["src", "tests", "docs", "configs"],
             files: {
                 ".gitignore": "venv\n__pycache__\n*.pyc\n.DS_Store\n",
@@ -62,20 +45,7 @@ function loadProjectConfig(projectPath: string): ProjectConfig {
                 "README.md": "# Project Title\n\nA brief description of your project.\n",
                 "src/__init__.py": "",
                 "tests/__init__.py": ""
-            },
-            standardLibModules: [
-                "abc", "argparse", "array", "asyncio", "base64", "binascii", "bisect", "calendar", "collections", "cmath",
-                "concurrent", "contextlib", "copy", "csv", "ctypes", "datetime", "decimal", "difflib", "dis", "email",
-                "enum", "faulthandler", "filecmp", "fnmatch", "fractions", "functools", "gc", "getopt", "getpass", "gettext",
-                "glob", "gzip", "hashlib", "heapq", "hmac", "html", "http", "imaplib", "importlib", "inspect", "io", "itertools",
-                "json", "keyword", "linecache", "locale", "logging", "lzma", "mailbox", "math", "mimetypes", "multiprocessing",
-                "netrc", "numbers", "operator", "os", "pathlib", "pickle", "pprint", "profile", "pstats", "queue", "random",
-                "re", "readline", "resource", "rlcompleter", "sched", "secrets", "select", "shelve", "shutil", "signal",
-                "site", "smtplib", "socket", "sqlite3", "ssl", "stat", "statistics", "string", "subprocess", "sys", "tabnanny",
-                "tempfile", "termios", "textwrap", "threading", "time", "timeit", "trace", "traceback", "tracemalloc", "tty",
-                "types", "unittest", "urllib", "uuid", "venv", "warnings", "weakref", "webbrowser", "xml", "zipfile", "zipimport",
-                "zlib"
-            ]
+            }
         };
 
         // Ensure the directory exists before creating the file
@@ -92,16 +62,8 @@ function loadProjectConfig(projectPath: string): ProjectConfig {
     return JSON.parse(configContent);
 }
 
-// Ensure globalProjectConfig is initialized
-function getProjectConfig(projectPath: string): ProjectConfig {
-    if (!globalProjectConfig) {
-        globalProjectConfig = loadProjectConfig(projectPath);
-    }
-    return globalProjectConfig;
-}
-
 // Function to validate naming conventions
-function validateName(name: string, type: 'directory' | 'file' | 'project'): boolean {
+function validateName(name, type) {
     const validNamePattern = type === 'file' ? /^[a-zA-Z0-9_\-\.]+$/ : /^[a-zA-Z0-9_\-]+$/;
     if (!validNamePattern.test(name)) {
         vscode.window.showErrorMessage(`Invalid ${type} name: ${name}. Only alphanumeric characters, hyphens, underscores${type === 'file' ? ', and periods' : ''} are allowed.`);
@@ -111,7 +73,7 @@ function validateName(name: string, type: 'directory' | 'file' | 'project'): boo
 }
 
 // Function called when the extension is activated
-export function activate(context: vscode.ExtensionContext) {
+function activate(context) {
     loadLocalization();
 
     context.subscriptions.push(
@@ -149,7 +111,7 @@ export function activate(context: vscode.ExtensionContext) {
             } else {
                 const addToExisting = await showQuickPickWithCancel(
                     [msgTranslation('addToExistingWorkspace'), msgTranslation('createNewWorkspace')],
-                    { placeHolder: msgTranslation('chooseWorkspaceOption') }
+                    { placeholder: msgTranslation('chooseWorkspaceOption') }
                 );
 
                 if (addToExisting === msgTranslation('addToExistingWorkspace')) {
@@ -209,20 +171,20 @@ export function activate(context: vscode.ExtensionContext) {
         }),
 
         vscode.commands.registerCommand('extension.updateRequirements', async () => {
-            const selectedProjectPath = await getProjectPathFromWorkspace(msgTranslation('enterProjectPathToUpdate'));
-            if (selectedProjectPath) {
-                await updateRequirementsTxt(selectedProjectPath);
+            const projectPath = await getProjectPathFromWorkspace(msgTranslation('enterProjectPathToUpdate'));
+            if (projectPath) {
+                updateRequirementsTxt(projectPath);
             }
         })
     );
 }
 
 // Function to show an input box with cancel handling
-async function showInputBoxWithCancel(options: vscode.InputBoxOptions): Promise<string | undefined> {
+async function showInputBoxWithCancel(options) {
     const inputBox = vscode.window.createInputBox();
     Object.assign(inputBox, options);
 
-    const result = await new Promise<string | undefined>((resolve) => {
+    const result = await new Promise((resolve) => {
         inputBox.onDidAccept(() => resolve(inputBox.value));
         inputBox.onDidHide(() => resolve(undefined));
         inputBox.show();
@@ -233,12 +195,12 @@ async function showInputBoxWithCancel(options: vscode.InputBoxOptions): Promise<
 }
 
 // Function to show a quick pick with cancel handling
-async function showQuickPickWithCancel(items: string[], options: vscode.QuickPickOptions): Promise<string | undefined> {
+async function showQuickPickWithCancel(items, options) {
     const quickPick = vscode.window.createQuickPick();
     quickPick.items = items.map(label => ({ label }));
     Object.assign(quickPick, options);
 
-    const result = await new Promise<string | undefined>((resolve) => {
+    const result = await new Promise((resolve) => {
         quickPick.onDidAccept(() => resolve(quickPick.selectedItems[0].label));
         quickPick.onDidHide(() => resolve(undefined));
         quickPick.show();
@@ -249,25 +211,25 @@ async function showQuickPickWithCancel(items: string[], options: vscode.QuickPic
 }
 
 // Function to show an information message with cancel handling
-async function showInformationMessageWithCancel(message: string, options: vscode.MessageOptions, ...items: string[]): Promise<string | undefined> {
+async function showInformationMessageWithCancel(message, options, ...items) {
     const result = await vscode.window.showInformationMessage(message, options, ...items);
     return result === undefined ? undefined : result;
 }
 
 // Function to prompt user to select a project path from the workspace folders
-const getProjectPathFromWorkspace: ProjectPathPrompt = async (prompt: string): Promise<string | undefined> => {
+const getProjectPathFromWorkspace = async (prompt) => {
     const selectedFolder = await showQuickPickWithCancel(
-        vscode.workspace.workspaceFolders ?
-            vscode.workspace.workspaceFolders.map(folder => folder.uri.fsPath).concat([msgTranslation('rootWorkspace')]) :
-            [msgTranslation('rootWorkspace')],
-        { placeHolder: prompt, canPickMany: false }
+        vscode.workspace.workspaceFolders ? 
+        vscode.workspace.workspaceFolders.map(folder => folder.uri.fsPath).concat([msgTranslation('rootWorkspace')]) : 
+        [msgTranslation('rootWorkspace')],
+        { placeholder: prompt, canPickMany: false }
     );
 
     return selectedFolder && selectedFolder !== msgTranslation('rootWorkspace') ? selectedFolder : undefined;
 };
 
 // Function to prompt user to select a folder path using a dialog
-const getProjectPathFromDialog: ProjectPathPrompt = async (prompt: string): Promise<string | undefined> => {
+const getProjectPathFromDialog = async (prompt) => {
     const result = await vscode.window.showOpenDialog({
         canSelectFolders: true,
         canSelectMany: false,
@@ -281,16 +243,16 @@ const getProjectPathFromDialog: ProjectPathPrompt = async (prompt: string): Prom
 };
 
 // Function to create the Python project structure
-function createPythonProjectStructure(projectPath: string) {
+function createPythonProjectStructure(projectPath) {
     try {
         if (!fs.existsSync(projectPath)) {
             fs.mkdirSync(projectPath, { recursive: true });
             logInfo(msgTranslation('directoryCreated') + ': ' + projectPath);
         }
 
-        const config = getProjectConfig(projectPath);
-        const dirs: string[] = config.directories;
-        const files: { [key: string]: string } = config.files;
+        const config = loadProjectConfig();
+        const dirs = config.directories;
+        const files = config.files;
 
         dirs.forEach(dir => {
             if (validateName(dir, 'directory')) {
@@ -313,13 +275,13 @@ function createPythonProjectStructure(projectPath: string) {
 
         logInfo(msgTranslation('projectStructureCreated'));
     } catch (error) {
-        logError(msgTranslation('failedToCreateStructure') + (error as Error).message);
-        vscode.window.showErrorMessage(`${msgTranslation('failedToCreateStructure')} ${(error as Error).message}`);
+        logError(msgTranslation('failedToCreateStructure') + error.message);
+        vscode.window.showErrorMessage(`${msgTranslation('failedToCreateStructure')} ${error.message}`);
     }
 }
 
 // Function to create a directory if it does not exist
-function createDirectory(dirPath: string) {
+function createDirectory(dirPath) {
     if (!fs.existsSync(dirPath)) {
         fs.mkdirSync(dirPath, { recursive: true });
         logInfo(msgTranslation('directoryCreated') + ': ' + dirPath);
@@ -327,7 +289,7 @@ function createDirectory(dirPath: string) {
 }
 
 // Function to create a file with specified content if it does not exist
-function createFile(filePath: string, content: string) {
+function createFile(filePath, content) {
     if (!fs.existsSync(filePath)) {
         fs.writeFileSync(filePath, content);
         logInfo(msgTranslation('fileCreated') + ': ' + filePath);
@@ -335,11 +297,11 @@ function createFile(filePath: string, content: string) {
 }
 
 // Function to analyze an existing Python project for missing elements
-async function analyzePythonProject(projectPath: string) {
+async function analyzePythonProject(projectPath) {
     try {
-        const config = getProjectConfig(projectPath);
-        const dirs: string[] = config.directories;
-        const files: { [key: string]: string } = config.files;
+        const config = loadProjectConfig();
+        const dirs = config.directories;
+        const files = config.files;
 
         const missingDirs = dirs.filter(dir => !fs.existsSync(path.join(projectPath, dir)));
         const missingFiles = Object.entries(files).filter(([file]) => !fs.existsSync(path.join(projectPath, file)));
@@ -375,167 +337,122 @@ async function analyzePythonProject(projectPath: string) {
         });
 
         // Update requirements.txt content
-        await updateRequirementsTxt(projectPath);
-        // Update README.md content
-        await updateReadmeMd(projectPath);
+        const requirementsFilePath = path.join(projectPath, 'requirements.txt');
+        if (fs.existsSync(requirementsFilePath)) {
+            const additionalRequirements = 'numpy\npandas\nscikit-learn\n';
+            fs.appendFileSync(requirementsFilePath, additionalRequirements);
+            logInfo(msgTranslation('requirementsUpdatedWithAdditionalPackages'));
+        }
 
         vscode.window.showInformationMessage(msgTranslation('missingElementsAdded'));
         logInfo(msgTranslation('missingElementsAdded'));
     } catch (error) {
-        logError(msgTranslation('failedToAnalyzeProject') + (error as Error).message);
-        vscode.window.showErrorMessage(`${msgTranslation('failedToAnalyzeProject')} ${(error as Error).message}`);
+        logError(msgTranslation('failedToAnalyzeProject') + error.message);
+        vscode.window.showErrorMessage(`${msgTranslation('failedToAnalyzeProject')} ${error.message}`);
     }
 }
 
 // Function to update the requirements.txt file based on the project's imported packages
-async function updateRequirementsTxt(selectedProjectPath: string): Promise<void> {
-    logInfo('Starting to update requirements.txt');
-    logInfo('-----------------------------------');
-    // Ensure selectedProjectPath is a string
-    if (Array.isArray(selectedProjectPath)) {
-        if (selectedProjectPath.length > 0) {
-            logInfo('selectedProjectPath is an array, taking the first element');
-            selectedProjectPath = selectedProjectPath[0];
-        } else {
-            logError('selectedProjectPath is an empty array');
+async function updateRequirementsTxt(projectPath) {
+    try {
+        const requirementsFilePath = path.join(projectPath, 'requirements.txt');
+        const existingPackages = new Map();
+
+        if (fs.existsSync(requirementsFilePath)) {
+            const content = fs.readFileSync(requirementsFilePath, 'utf-8');
+            content.split('\n').forEach(line => {
+                const match = line.match(/^([a-zA-Z0-9-_]+)(==[0-9a-zA-Z.\-_]+)?$/);
+                if (match) {
+                    const packageName = match[1].trim();
+                    const version = match[2] ? match[2].trim() : '';
+                    existingPackages.set(packageName, version);
+                }
+            });
+        }
+
+        const importedPackages = collectImportedPackages(projectPath);
+        const missingPackages = Array.from(importedPackages).filter(pkg => !existingPackages.has(pkg) && isValidPackageName(pkg));
+
+        if (missingPackages.length === 0) {
+            vscode.window.showInformationMessage(msgTranslation('noPackagesToAdd'));
+            logInfo(msgTranslation('noPackagesToAdd'));
             return;
         }
-    }
 
-    logInfo('Checking if requirements.txt exists');
-    const requirementsPath = path.join(selectedProjectPath, 'requirements.txt');
-    logInfo(`requirementsPath: ${requirementsPath}`);
+        const selectedPackages = await showQuickPickMultiSelect(missingPackages, msgTranslation('selectPackagesToAdd'));
 
-    let existingPackages: string[] = [];
-    try {
-        const data = await fs.promises.readFile(requirementsPath, 'utf8');
-        existingPackages = data.split('\n').filter(Boolean);
-    } catch (error) {
-        if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
-            logError(`Error reading requirements.txt: ${(error as Error).message}`);
+        if (!selectedPackages || selectedPackages.length === 0) {
+            vscode.window.showInformationMessage(msgTranslation('noChangesMade'));
+            logInfo(msgTranslation('noChangesMade'));
             return;
         }
-        logInfo('requirements.txt does not exist, it will be created');
-    }
 
-    logInfo(`Existing packages: (${existingPackages.length}) ${existingPackages.join(', ')}`);
-
-    logInfo('Collecting imported packages');
-    const importedPackages = collectImportedPackages(selectedProjectPath);
-    logInfo(`Imported packages: (${importedPackages.length}) ${importedPackages.join(', ')}`);
-
-    const newPackages = importedPackages.filter(pkg => !existingPackages.includes(pkg));
-    if (newPackages.length === 0) {
-        logInfo('No new packages to add to requirements.txt');
-        return;
-    }
-
-    logInfo(`New packages to add: ${newPackages.join(', ')}`);
-
-    const updatedPackages = [...new Set([...existingPackages, ...newPackages])].sort();
-
-    try {
-        await fs.promises.writeFile(requirementsPath, updatedPackages.join('\n'), 'utf8');
-        logInfo('requirements.txt updated successfully');
+        const newContent = selectedPackages.map(pkg => `${pkg}\n`).join('');
+        fs.appendFileSync(requirementsFilePath, newContent);
+        vscode.window.showInformationMessage(msgTranslation('requirementsUpdated'));
+        logInfo(msgTranslation('requirementsUpdated'));
     } catch (error) {
-        logError(`Error updating requirements.txt: ${(error as Error).message}`);
+        logError(msgTranslation('failedToUpdateRequirements') + error.message);
+        vscode.window.showErrorMessage(`${msgTranslation('failedToUpdateRequirements')} ${error.message}`);
     }
 }
 
 // Function to validate if a package name is valid (not a standard library module)
-function isValidPackageName(packageName: string): boolean {
-    const standardLibModules = getProjectConfig('').standardLibModules;
-    return standardLibModules && !standardLibModules.includes(packageName) && /^[a-zA-Z0-9_\-]+$/.test(packageName);
+function isValidPackageName(packageName) {
+    const standardLibModules = loadStandardLibModules();
+    return !standardLibModules.has(packageName);
+}
+
+// Function to load standard library modules from a JSON file
+function loadStandardLibModules() {
+    const standardLibModulesFilePath = path.join(__dirname, 'standardLibModules.json');
+    const standardLibModulesContent = fs.readFileSync(standardLibModulesFilePath, 'utf-8');
+    const standardLibModulesArray = JSON.parse(standardLibModulesContent);
+    return new Set(standardLibModulesArray);
 }
 
 // Function to collect imported packages from the Python files in the directory
-function collectImportedPackages(projectPath: string): string[] {
-    const importedPackages = new Set<string>();
+function collectImportedPackages(directory) {
+    const importedPackages = new Set();
 
     // Recursively scan directories for Python files and collect imported packages
-    function scanDirectory(dir: string) {
+    function scanDirectory(dir) {
         const files = fs.readdirSync(dir);
 
         files.forEach(file => {
             const filePath = path.join(dir, file);
             const stat = fs.statSync(filePath);
 
-            // Skip virtual environment directories
-            if (stat.isDirectory() && path.basename(filePath) === 'myenv') {
-                logInfo(`Skipping virtual environment directory: ${filePath}`);
-                return;
-            }
-
             if (stat.isDirectory()) {
                 scanDirectory(filePath);
             } else if (file.endsWith('.py')) {
-                logInfo(`Reading file: ${filePath}`);
                 const content = fs.readFileSync(filePath, 'utf-8');
+                const importStatements = content.match(/(?:import\s+([^\s,]+)|from\s+([^\s,]+))/g);
 
-                const cleanContent = content
-                    .replace(/""".*?"""/gs, '')
-                    .replace(/'''.*?'''/gs, '')
-                    .replace(/#.*$/gm, '');
-                
-                cleanContent.split('\n').forEach(line => {
-                    let match;
-                    if ((match = line.match(/^\s*import\s+([^\s,]+)/))) {
-                        const packageName = match[1].split('.')[0];
-                        if (packageName && isValidPackageName(packageName)) {
+                if (importStatements) {
+                    importStatements.forEach(statement => {
+                        const packageName = statement.replace(/(?:import\s+|from\s+)([^\s,]+).*/, '$1').split('.')[0];
+                        if (packageName) {
                             importedPackages.add(packageName);
-                            logInfo(`Found package: ${packageName}`);
                         }
-                    } else if ((match = line.match(/^\s*from\s+([^\s,]+)\s+import\s+/))) {
-                        const packageName = match[1].split('.')[0];
-                        if (packageName && isValidPackageName(packageName)) {
-                            importedPackages.add(packageName);
-                            logInfo(`Found package: ${packageName}`);
-                        }
-                    }
-                });
+                    });
+                }
             }
         });
     }
 
-    scanDirectory(projectPath);
-    return Array.from(importedPackages);
-}
-
-// Function to update README.md file based on project analysis
-async function updateReadmeMd(projectPath: string): Promise<void> {
-    const readmePath = path.join(projectPath, 'README.md');
-    let readmeContent = '# Project Title\n\nA brief description of your project.\n\n## Project Structure\n\n';
-
-    try {
-        const config = getProjectConfig(projectPath);
-        const dirs: string[] = config.directories;
-        const files: { [key: string]: string } = config.files;
-
-        readmeContent += '### Directories:\n';
-        dirs.forEach(dir => {
-            readmeContent += `- ${dir}\n`;
-        });
-
-        readmeContent += '\n### Files:\n';
-        Object.keys(files).forEach(file => {
-            readmeContent += `- ${file}\n`;
-        });
-
-        await fs.promises.writeFile(readmePath, readmeContent, 'utf8');
-        logInfo('README.md updated successfully');
-    } catch (error) {
-        logError(`Error updating README.md: ${(error as Error).message}`);
-    }
+    scanDirectory(directory);
+    return importedPackages;
 }
 
 // Function to show a quick pick multi-select window with cancel handling
-async function showQuickPickMultiSelect(items: string[], placeholder: string): Promise<string[] | undefined> {
-    const quickPick = vscode.window.createQuickPick<vscode.QuickPickItem>();
+async function showQuickPickMultiSelect(items, placeholder) {
+    const quickPick = vscode.window.createQuickPick();
     quickPick.items = items.map(label => ({ label }));
     quickPick.canSelectMany = true;
     quickPick.placeholder = placeholder;
 
-    const result = await new Promise<string[] | undefined>((resolve) => {
+    const result = await new Promise((resolve) => {
         quickPick.onDidAccept(() => resolve(quickPick.selectedItems.map(item => item.label)));
         quickPick.onDidHide(() => resolve(undefined));
         quickPick.show();
@@ -546,6 +463,11 @@ async function showQuickPickMultiSelect(items: string[], placeholder: string): P
 }
 
 // Function called when the extension is deactivated
-export function deactivate() {
+function deactivate() {
     logInfo(msgTranslation('extensionDeactivated'));
 }
+
+module.exports = {
+    activate,
+    deactivate
+};

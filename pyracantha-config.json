@@ -1,0 +1,23 @@
+{
+    "directories": ["src", "tests", "docs", "configs"],
+    "files": {
+        ".gitignore": "venv\n__pycache__\n*.pyc\n.DS_Store\n",
+        "requirements.txt": "",
+        "README.md": "# Project Title\n\nA brief description of your project.\n",
+        "src/__init__.py": "",
+        "tests/__init__.py": ""
+    },
+    "standardLibModules": [
+        "abc", "argparse", "array", "asyncio", "base64", "binascii", "bisect", "calendar", "collections", "cmath",
+        "concurrent", "contextlib", "copy", "csv", "ctypes", "datetime", "decimal", "difflib", "dis", "email",
+        "enum", "faulthandler", "filecmp", "fnmatch", "fractions", "functools", "gc", "getopt", "getpass", "gettext",
+        "glob", "gzip", "hashlib", "heapq", "hmac", "html", "http", "imaplib", "importlib", "inspect", "io", "itertools",
+        "json", "keyword", "linecache", "locale", "logging", "lzma", "mailbox", "math", "mimetypes", "multiprocessing",
+        "netrc", "numbers", "operator", "os", "pathlib", "pickle", "pprint", "profile", "pstats", "queue", "random",
+        "re", "readline", "resource", "rlcompleter", "sched", "secrets", "select", "shelve", "shutil", "signal",
+        "site", "smtplib", "socket", "sqlite3", "ssl", "stat", "statistics", "string", "subprocess", "sys", "tabnanny",
+        "tempfile", "termios", "textwrap", "threading", "time", "timeit", "trace", "traceback", "tracemalloc", "tty",
+        "types", "unittest", "urllib", "uuid", "venv", "warnings", "weakref", "webbrowser", "xml", "zipfile", "zipimport",
+        "zlib"
+    ]
+}

@@ -1,71 +1,96 @@
-# pyracantha README
 
-This is the README for your extension "pyracantha". After writing up a brief description, we recommend including the following sections.
+# PyRacantha
+
+PyRacantha is a VS Code extension designed to help you set up the basic structure for your Python projects and standardize them. It provides functionalities for creating project structures, analyzing existing projects, and updating `requirements.txt` based on imported packages.
+
+## Table of Contents
+
+- [Features](#features)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Configuration](#configuration)
+- [Contributing](#contributing)
+- [License](#license)
+- [Contact](#contact)
 
 ## Features
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+- **Create Python Project Structure**: Create a standard Python project structure in a selected folder.
+- **Analyze Python Project**: Analyze an existing Python project and identify missing elements based on a predefined configuration.
+- **Update Requirements**: Update the `requirements.txt` file based on the project's imported packages.
 
-For example if there is an image subfolder under your extension project workspace:
+## Installation
 
-\!\[feature X\]\(images/feature-x.png\)
+To install the extension, download the latest release and add it to your VS Code extensions folder.
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+## Usage
 
-## Requirements
+### Create Python Project Structure
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+1. Open the command palette (`Ctrl+Shift+P` or `Cmd+Shift+P` on Mac).
+2. Type `Create Python Project Structure` and select the command.
+3. Enter the project name when prompted.
+4. Select a folder where the project should be created.
+5. Choose whether to add the project to an existing workspace or create a new workspace:
+   - **Yes, add to the existing workspace**: Adds the new project to the current workspace.
+   - **No, create a new workspace**: Creates a new workspace with the specified name and adds the new project to it.
 
-## Extension Settings
+### Analyze Python Project
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
+1. Open the command palette (`Ctrl+Shift+P` or `Cmd+Shift+P` on Mac).
+2. Type `Analyze Python Project` and select the command.
+3. Select the project folder to analyze.
+4. The extension will identify missing directories and files based on the predefined configuration and prompt you to add them.
 
-For example:
+### Update Requirements
 
-This extension contributes the following settings:
+1. Open the command palette (`Ctrl+Shift+P` or `Cmd+Shift+P` on Mac).
+2. Type `Update Requirements` and select the command.
+3. Select the project folder to update.
+4. The extension will analyze the project's imports and update the `requirements.txt` file with any missing packages.
 
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
+### Multi-select Packages to Add
 
-## Known Issues
+When updating the `requirements.txt` file, if there are many packages to add, a multi-select quick pick window will be displayed. The user can select which packages to add from the list of identified missing packages.
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
+## Configuration
 
-## Release Notes
+PyRacantha uses a configuration file to define the standard project structure. By default, the configuration file is located at `${workspaceFolder}/.vscode/pyracantha-config.json`.
 
-Users appreciate release notes as you update your extension.
+### Default Configuration
 
-### 1.0.0
+```json
+{
+    "directories": ["src", "tests", "docs", "configs"],
+    "files": {
+        ".gitignore": "venv\n__pycache__\n*.pyc\n.DS_Store\n",
+        "requirements.txt": "",
+        "README.md": "# Project Title\n\nA brief description of your project.\n",
+        "src/__init__.py": "",
+        "tests/__init__.py": ""
+    }
+}
+```
 
-Initial release of ...
+## Contributing
 
-### 1.0.1
+We welcome contributions! To contribute:
 
-Fixed issue #.
+1. Fork the repository
+2. Create a new branch (`git checkout -b feature-branch`)
+3. Commit your changes (`git commit -am 'Add new feature'`)
+4. Push to the branch (`git push origin feature-branch`)
+5. Create a new Pull Request
 
-### 1.1.0
+## License
 
-Added features X, Y, and Z.
+You are free to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, subject to the following conditions: The software is provided "as is", without warranty of any kind, express or implied, including but not limited to the warranties of merchantability, fitness for a particular purpose and noninfringement. In no event shall the authors or copyright holders be liable for any claim, damages or other liability, whether in an action of contract, tort or otherwise, arising from, out of or in connection with the software or the use or other dealings in the software.
 
----
 
-## Following extension guidelines
+## Contact
 
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
+For any questions or suggestions, please contact:
 
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
-
-## Working with Markdown
-
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
-
-## For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+- Name: Yann Ortodoro
+- Email: yann.ortodoro@gmail.com
+- GitHub: [Yann-0](https://github.com/Yann-0)
